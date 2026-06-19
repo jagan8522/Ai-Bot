@@ -1,8 +1,8 @@
-// Visual style definitions for Apple Liquid Glass Theme (Absolute Transparent, No Background Colors)
+// Visual style definitions for the Semantic Doc Q&A App matching the screenshot design
 
 export const globalStyles = `
   body {
-    background: #0b0f19; /* Solid neutral dark slate background for text visibility */
+    background: #c8d5e0; /* Muted soft blue-gray background */
     margin: 0;
     padding: 0;
     overflow: hidden;
@@ -21,14 +21,54 @@ export const globalStyles = `
     align-items: center;
     width: 100%;
     height: 100%;
-    padding: 24px;
+    padding: 0;
     box-sizing: border-box;
     position: relative;
     overflow: hidden;
     z-index: 1;
   }
   
-  /* Webkit custom scrollbars */
+  /* Decorative Background Blobs for cool blue-gray ambience */
+  .bg-blob-1 {
+    position: absolute;
+    width: 700px;
+    height: 700px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(186, 210, 229, 0.80) 0%, rgba(200, 213, 224, 0) 70%);
+    filter: blur(80px);
+    top: -150px;
+    left: -150px;
+    z-index: 0;
+    pointer-events: none;
+  }
+  
+  .bg-blob-2 {
+    position: absolute;
+    width: 600px;
+    height: 600px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(162, 196, 218, 0.70) 0%, rgba(200, 213, 224, 0) 70%);
+    filter: blur(90px);
+    bottom: -100px;
+    right: -100px;
+    z-index: 0;
+    pointer-events: none;
+  }
+
+  .bg-blob-3 {
+    position: absolute;
+    width: 500px;
+    height: 500px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(144, 180, 206, 0.50) 0%, rgba(200, 213, 224, 0) 70%);
+    filter: blur(80px);
+    top: 30%;
+    right: 15%;
+    z-index: 0;
+    pointer-events: none;
+  }
+  
+  /* Webkit custom scrollbars - Blue-gray theme */
   ::-webkit-scrollbar {
     width: 6px;
     height: 6px;
@@ -37,18 +77,25 @@ export const globalStyles = `
     background: transparent;
   }
   ::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.08);
+    background: rgba(98, 125, 152, 0.25);
     border-radius: 4px;
   }
   ::-webkit-scrollbar-thumb:hover {
-    background: rgba(255, 255, 255, 0.18);
+    background: rgba(98, 125, 152, 0.45);
   }
   
+  /* Dark sidebars custom scrollbar */
+  .dark-scroll::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.1);
+  }
+  .dark-scroll::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.2);
+  }
+
   /* Drag and drop overlay */
   .drag-over {
     border-color: #38bdf8 !important;
-    background-color: rgba(255, 255, 255, 0.08) !important;
-    box-shadow: 0 0 25px rgba(255, 255, 255, 0.15) !important;
+    background-color: rgba(255, 255, 255, 0.05) !important;
     transform: scale(1.01);
   }
   
@@ -73,22 +120,26 @@ export const globalStyles = `
     100% { background-position: 200% 0; }
   }
   .shimmer-bar {
-    background: linear-gradient(90deg, #38bdf8 25%, #818cf8 50%, #38bdf8 75%) !important;
+    background: linear-gradient(90deg, #10b981 25%, #34d399 50%, #10b981 75%) !important;
     background-size: 200% 100% !important;
     animation: shimmer 1.5s infinite linear !important;
   }
 
   /* Interactive Buttons hover */
   .interactive-btn {
-    transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   }
   .interactive-btn:hover:not(:disabled) {
-    transform: translateY(-1px);
-    box-shadow: 0 4px 14px rgba(255, 255, 255, 0.15);
-    filter: brightness(1.1);
+    transform: scale(1.03);
+    filter: brightness(1.15);
   }
   .interactive-btn:active:not(:disabled) {
-    transform: translateY(0);
+    transform: scale(0.98);
+  }
+
+  /* Dark blue search bar placeholder */
+  .dark-input-field::placeholder {
+    color: rgba(200, 214, 233, 0.55);
   }
 `;
 
@@ -100,150 +151,139 @@ export const styles = {
     alignItems: 'center',
     width: '100%',
     height: '100%',
-    zIndex: 1,
+    zIndex: 10,
   },
   appContainer: {
     display: 'flex',
-    width: '100%',
-    maxWidth: '1240px',
-    height: '86vh',
-    maxHeight: '820px',
-    background: 'transparent', // Absolute transparent background
-    backdropFilter: 'blur(30px) saturate(180%)',
-    WebkitBackdropFilter: 'blur(30px) saturate(180%)',
-    borderRadius: '28px', // Premium rounded corners
-    border: '1.5px solid rgba(255, 255, 255, 0.45)', // Clean white reflective border highlight
-    boxShadow: `
-      0 30px 70px rgba(0, 0, 0, 0.2),
-      inset 0 1px 0 rgba(255, 255, 255, 0.4)
-    `,
+    width: '100vw',
+    height: '100vh',
+    background: 'transparent',
+    borderRadius: '0px',
     overflow: 'hidden',
     boxSizing: 'border-box',
-    zIndex: 10,
-    color: '#ffffff', // High contrast white text
+    zIndex: 12,
   },
+
+  // Left configuration sidebar (Sleek glassmorphism dark theme)
   sidebar: {
     width: '320px',
-    borderRight: '1.5px solid rgba(255, 255, 255, 0.25)', // Bright reflective divider
-    padding: '20px',
+    backgroundColor: 'rgba(30, 41, 59, 0.88)', // Sleek dark slate
+    backdropFilter: 'blur(20px)',
+    WebkitBackdropFilter: 'blur(20px)',
+    padding: '24px 20px',
     display: 'flex',
     flexDirection: 'column',
-    gap: '12px',
+    gap: '18px',
     height: '100%',
     overflowY: 'auto',
     flexShrink: 0,
     boxSizing: 'border-box',
-    background: 'transparent',
+    borderRight: '1px solid rgba(255, 255, 255, 0.04)',
   },
   sidebarHeader: {
     display: 'flex',
     alignItems: 'center',
     gap: '12px',
-    padding: '12px 14px',
-    background: 'transparent', // Translucent colorless header
-    border: '1px solid rgba(255, 255, 255, 0.35)', // Bright reflective border highlight
-    borderRadius: '16px',
-    boxShadow: `
-      0 4px 12px rgba(0,0,0,0.02),
-      inset 0 1px 0 rgba(255,255,255,0.2)
-    `,
+    paddingBottom: '8px',
   },
   logoBadge: {
-    width: '36px',
-    height: '36px',
-    borderRadius: '8px',
-    backgroundColor: 'transparent',
-    border: '1px solid rgba(255, 255, 255, 0.35)',
+    width: '38px',
+    height: '38px',
+    borderRadius: '10px',
+    backgroundColor: '#3b2f23', // Gold-brown matching square
+    border: '1px solid #ffd700',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
+    flexShrink: 0,
   },
   sidebarTitle: {
-    fontSize: '14.5px',
+    fontSize: '15px',
     fontWeight: '700',
-    letterSpacing: '-0.015em',
-    color: '#ffffff',
+    color: '#eab308', // Gold text
     margin: 0,
+    lineHeight: '1.2',
   },
   sidebarSubtitle: {
-    fontSize: '10px',
-    color: '#38bdf8', // Sky-blue indicators
-    fontWeight: '700',
+    fontSize: '9.5px',
+    color: '#94a3b8',
+    fontWeight: '600',
     textTransform: 'uppercase',
-    letterSpacing: '0.08em',
+    letterSpacing: '0.05em',
   },
+
+  // Card elements inside config sidebar
   card: {
-    backgroundColor: 'transparent', // Transparent card base
-    border: '1px solid rgba(255, 255, 255, 0.3)', // Thin glassy border
-    borderRadius: '16px',
+    backgroundColor: '#1e2530', // Dark card body
+    border: '1px solid #2d3748',
+    borderRadius: '12px',
     padding: '14px',
     boxSizing: 'border-box',
-    boxShadow: `
-      0 4px 12px rgba(0,0,0,0.01),
-      inset 0 1px 0 rgba(255,255,255,0.15)
-    `,
+    boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
   },
   cardTitle: {
     fontSize: '10.5px',
     fontWeight: '700',
     textTransform: 'uppercase',
-    color: 'rgba(255, 255, 255, 0.75)',
-    letterSpacing: '0.08em',
+    color: '#94a3b8', // Gray label
+    letterSpacing: '0.06em',
     display: 'flex',
     alignItems: 'center',
     margin: '0 0 10px 0',
   },
   statusBox: {
-    backgroundColor: 'transparent', // Translucent clear backing
-    borderRadius: '10px',
-    padding: '10px',
-    border: '1px solid rgba(255, 255, 255, 0.20)', // White rim
+    backgroundColor: 'rgba(255, 255, 255, 0.02)',
+    borderRadius: '8px',
+    padding: '8px 10px',
+    border: '1px solid rgba(255, 255, 255, 0.05)',
   },
   statusIndicatorContainer: {
     display: 'flex',
     alignItems: 'center',
     gap: '8px',
-    marginBottom: '2px',
   },
   statusIndicator: {
-    width: '8px',
-    height: '8px',
+    width: '7px',
+    height: '7px',
     borderRadius: '50%',
     display: 'inline-block',
   },
   statusLabel: {
-    fontSize: '12px',
-    fontWeight: '700',
+    fontSize: '11px',
+    fontWeight: '600',
     color: '#ffffff',
   },
   statusText: {
-    fontSize: '11px',
-    color: 'rgba(255, 255, 255, 0.75)',
+    fontSize: '10.5px',
+    color: 'rgba(255, 255, 255, 0.55)',
     margin: 0,
     marginTop: '4px',
     wordBreak: 'break-all',
+    lineHeight: '1.4',
   },
   modelProgressBarContainer: {
-    height: '5px',
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    borderRadius: '3px',
+    height: '4px',
+    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+    borderRadius: '2px',
     overflow: 'hidden',
     marginTop: '6px',
-    marginBottom: '2px',
   },
   modelProgressBar: {
     height: '100%',
-    backgroundColor: '#38bdf8',
-    borderRadius: '3px',
+    backgroundColor: '#10b981', // Green progress bar
+    borderRadius: '2px',
     transition: 'width 0.3s ease',
   },
   externalLink: {
-    fontSize: '11px',
+    fontSize: '10.5px',
     color: '#38bdf8',
     textDecoration: 'none',
     display: 'inline-flex',
     alignItems: 'center',
     fontWeight: '600',
+    backgroundColor: 'rgba(56, 189, 248, 0.1)',
+    padding: '3px 8px',
+    borderRadius: '4px',
   },
   inputWrapper: {
     position: 'relative',
@@ -252,12 +292,12 @@ export const styles = {
   },
   apiInput: {
     width: '100%',
-    backgroundColor: 'transparent', // Transparent input
-    border: '1px solid rgba(255, 255, 255, 0.35)', // Bright highlight border
-    borderRadius: '10px',
+    backgroundColor: 'rgba(0, 0, 0, 0.2)',
+    border: '1px solid #2d3748',
+    borderRadius: '8px',
     padding: '8px 32px 8px 10px',
     color: '#ffffff',
-    fontSize: '12.5px',
+    fontSize: '12px',
     outline: 'none',
     boxSizing: 'border-box',
     fontFamily: 'monospace',
@@ -267,7 +307,7 @@ export const styles = {
     right: '8px',
     background: 'none',
     border: 'none',
-    color: 'rgba(255, 255, 255, 0.65)',
+    color: 'rgba(255, 255, 255, 0.4)',
     cursor: 'pointer',
     display: 'flex',
     alignItems: 'center',
@@ -275,24 +315,24 @@ export const styles = {
     padding: '4px',
   },
   secureText: {
-    fontSize: '11px',
-    color: '#34d399',
+    fontSize: '10px',
+    color: '#10b981',
     fontWeight: '600',
   },
   clearKeyBtn: {
     background: 'none',
     border: 'none',
-    fontSize: '11px',
-    color: '#ff4d6d',
+    fontSize: '10px',
+    color: '#ef4444',
     cursor: 'pointer',
     padding: 0,
     textDecoration: 'underline',
     fontWeight: '600',
   },
   dropZone: {
-    border: '1.5px dashed rgba(255, 255, 255, 0.35)', // Reflective dashes
-    borderRadius: '12px',
-    padding: '24px 12px',
+    border: '1.5px dashed rgba(255, 255, 255, 0.15)',
+    borderRadius: '10px',
+    padding: '20px 10px',
     textAlign: 'center',
     cursor: 'pointer',
     display: 'flex',
@@ -301,22 +341,21 @@ export const styles = {
     justifyContent: 'center',
     backgroundColor: 'transparent',
     transition: 'all 0.2s ease',
-    flex: 1,
     boxSizing: 'border-box',
   },
   fileDetailsCard: {
-    backgroundColor: 'transparent',
-    border: '1px solid rgba(255, 255, 255, 0.25)',
-    borderRadius: '12px',
-    padding: '12px',
+    backgroundColor: 'rgba(255, 255, 255, 0.01)',
+    border: '1px solid rgba(255, 255, 255, 0.08)',
+    borderRadius: '10px',
+    padding: '10px',
   },
   fileInfoRow: {
     display: 'flex',
     alignItems: 'center',
-    gap: '10px',
+    gap: '8px',
   },
   fileName: {
-    fontSize: '12.5px',
+    fontSize: '11.5px',
     fontWeight: '600',
     color: '#ffffff',
     margin: 0,
@@ -325,103 +364,137 @@ export const styles = {
     textOverflow: 'ellipsis',
   },
   fileSize: {
-    fontSize: '10.5px',
-    color: 'rgba(255, 255, 255, 0.7)',
+    fontSize: '10px',
+    color: 'rgba(255, 255, 255, 0.5)',
     margin: 0,
-    marginTop: '2px',
+    marginTop: '1px',
   },
   trashBtn: {
     background: 'none',
     border: 'none',
-    color: '#ff4d6d',
+    color: '#ef4444',
     cursor: 'pointer',
-    padding: '6px',
+    padding: '5px',
     borderRadius: '6px',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: 'rgba(255, 77, 109, 0.08)',
-    border: '1px solid rgba(255, 77, 109, 0.25)',
+    backgroundColor: 'rgba(239, 68, 68, 0.08)',
+    border: '1px solid rgba(239, 68, 68, 0.15)',
   },
   indexingProgressBarContainer: {
-    height: '6px',
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    borderRadius: '3px',
+    height: '5px',
+    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+    borderRadius: '2.5px',
     overflow: 'hidden',
   },
   indexingProgressBar: {
     height: '100%',
-    borderRadius: '3px',
+    borderRadius: '2.5px',
     transition: 'width 0.2s ease',
   },
-  chunkBadgeContainer: {
-    marginTop: '10px',
+
+  // Vector computation card details
+  greenProgressBar: {
+    height: '100%',
+    background: 'linear-gradient(90deg, #10b981, #22c55e)',
+    borderRadius: '2.5px',
+    transition: 'width 0.2s ease',
   },
-  chunkBadge: {
-    display: 'inline-block',
+  percentLabel: {
+    color: '#10b981',
+    fontWeight: '700',
+    fontSize: '11px',
+  },
+  vectorBadge: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '6px',
     fontSize: '10px',
-    backgroundColor: 'transparent',
-    color: '#38bdf8',
-    border: '1px solid rgba(255, 255, 255, 0.25)',
-    padding: '3px 8px',
-    borderRadius: '20px',
+    backgroundColor: '#022c22',
+    color: '#34d399',
+    border: '1px solid #064e3b',
+    padding: '5px 10px',
+    borderRadius: '6px',
     fontWeight: '600',
+    marginTop: '8px',
+  },
+  pulseGreenDot: {
+    width: '6px',
+    height: '6px',
+    borderRadius: '50%',
+    backgroundColor: '#10b981',
+    boxShadow: '0 0 6px #10b981',
   },
   helperNote: {
-    marginTop: '12px',
-    backgroundColor: 'transparent',
-    border: '1px solid rgba(255, 255, 255, 0.25)',
-    borderRadius: '12px',
-    padding: '10px 12px',
-    fontSize: '10.5px',
-    color: '#fbbf24',
+    marginTop: 'auto',
+    backgroundColor: 'rgba(255, 255, 255, 0.02)',
+    border: '1px solid rgba(255, 255, 255, 0.05)',
+    borderRadius: '10px',
+    padding: '8px 10px',
+    fontSize: '9.5px',
+    color: 'rgba(255, 255, 255, 0.4)',
     display: 'flex',
-    gap: '8px',
-    lineHeight: '1.45',
+    gap: '6px',
+    lineHeight: '1.4',
     fontWeight: '500',
   },
+
+  // Right Chat Area (warm cream theme)
   chatContainer: {
     flex: 1,
     display: 'flex',
     flexDirection: 'column',
     height: '100%',
-    backgroundColor: 'transparent', // Fully transparent
+    backgroundColor: 'rgba(235, 241, 246, 0.94)', // Translucent soft pastel blue-gray
+    backdropFilter: 'blur(20px)',
+    WebkitBackdropFilter: 'blur(20px)',
     boxSizing: 'border-box',
   },
   chatHeader: {
-    height: '60px',
-    borderBottom: '1.5px solid rgba(255, 255, 255, 0.25)', // Bright transparent line
+    height: '56px',
+    borderBottom: '1px solid #d9e2ec', // Muted blue-gray border
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'space-between',
-    padding: '0 24px',
+    padding: '0 20px',
     flexShrink: 0,
     backgroundColor: 'transparent',
     boxSizing: 'border-box',
+  },
+  chatHeaderTitle: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px',
+    fontSize: '12px',
+    fontWeight: '700',
+    color: '#334e68', // Muted steel blue
+    textTransform: 'uppercase',
+    letterSpacing: '0.06em',
   },
   currentFileIndicator: {
     display: 'flex',
     alignItems: 'center',
     gap: '8px',
-    backgroundColor: 'transparent',
-    border: '1px solid rgba(255, 255, 255, 0.3)',
-    padding: '4px 12px',
+    backgroundColor: '#d9e2ec', // Soft blue-gray badge
+    border: '1px solid #bcccdc',
+    padding: '4px 10px',
     borderRadius: '30px',
   },
   greenPulseDot: {
     width: '6px',
     height: '6px',
     borderRadius: '50%',
-    backgroundColor: '#34d399',
-    boxShadow: '0 0 8px #34d399',
+    backgroundColor: '#10b981',
+    boxShadow: '0 0 6px #10b981',
   },
   messagesBox: {
     flex: 1,
     overflowY: 'auto',
-    padding: '24px',
+    padding: '20px',
     display: 'flex',
     flexDirection: 'column',
-    gap: '14px',
+    gap: '16px',
     boxSizing: 'border-box',
   },
   messageRow: {
@@ -429,31 +502,62 @@ export const styles = {
     width: '100%',
   },
   messageBubble: {
-    padding: '12px 18px',
+    padding: '12px 16px',
     borderRadius: '16px',
-    boxShadow: '0 4px 16px rgba(0,0,0,0.05)',
+    boxShadow: '0 1px 3px rgba(0,0,0,0.03)',
     boxSizing: 'border-box',
-    backdropFilter: 'blur(20px)',
-    WebkitBackdropFilter: 'blur(20px)',
+    maxWidth: '85%',
   },
   userBubble: {
-    backgroundColor: 'transparent', // Completely transparent
-    border: '1.5px solid rgba(255, 255, 255, 0.45)', // Beveled reflection
+    backgroundColor: '#486581', // Muted steel blue-gray
     color: '#ffffff',
+    alignSelf: 'flex-end',
+    borderBottomRightRadius: '4px',
+    border: '1px solid #334e68',
   },
   botBubble: {
-    backgroundColor: 'transparent', // Completely transparent
-    border: '1px solid rgba(255, 255, 255, 0.25)', // Soft reflect rim
-    color: '#ffffff',
+    backgroundColor: '#ffffff', // Clean white
+    border: '1px solid #d9e2ec',
+    color: '#102a43', // Dark slate-blue text
+    alignSelf: 'flex-start',
+    borderTopLeftRadius: '4px',
+    boxShadow: '0 2px 8px rgba(98, 125, 152, 0.04)',
   },
   systemBubble: {
-    backgroundColor: 'transparent', // Completely transparent
-    border: '1.2px solid rgba(255, 255, 255, 0.35)', // Bright reflect border
-    color: '#38bdf8',
+    backgroundColor: '#d9e2ec', // Soft blue-gray banner
+    border: '1px solid #bcccdc',
+    color: '#102a43',
+    width: '100%',
+    alignSelf: 'center',
+    textAlign: 'left',
+    borderRadius: '12px',
   },
+
+  // Custom styled answers inside chat
+  markdownHeading: {
+    fontWeight: '700',
+    margin: '12px 0 6px 0',
+    color: '#102a43',
+    fontSize: '13.5px',
+  },
+  markdownParagraph: {
+    margin: '0 0 8px 0',
+    lineHeight: '1.6',
+    fontSize: '12.5px',
+  },
+  markdownList: {
+    margin: '0 0 10px 0',
+    paddingLeft: '18px',
+    lineHeight: '1.5',
+    fontSize: '12.5px',
+  },
+  markdownListItem: {
+    margin: '4px 0',
+  },
+
   inputArea: {
-    padding: '18px 24px',
-    borderTop: '1.5px solid rgba(255, 255, 255, 0.25)', // Bright transparent line
+    padding: '16px 20px',
+    borderTop: '1px solid #d9e2ec',
     backgroundColor: 'transparent',
     flexShrink: 0,
     boxSizing: 'border-box',
@@ -462,7 +566,7 @@ export const styles = {
     display: 'flex',
     flexDirection: 'column',
     gap: '6px',
-    marginBottom: '12px',
+    marginBottom: '10px',
   },
   sampleQuestionsRow: {
     display: 'flex',
@@ -470,35 +574,31 @@ export const styles = {
     gap: '6px',
   },
   sampleBtn: {
-    backgroundColor: 'transparent',
-    border: '1px solid rgba(255, 255, 255, 0.25)',
-    color: 'rgba(255, 255, 255, 0.85)',
+    backgroundColor: 'rgba(255, 255, 255, 0.75)',
+    border: '1px solid #d9e2ec',
+    color: '#486581',
     borderRadius: '30px',
-    padding: '6px 14px',
-    fontSize: '11px',
+    padding: '5px 12px',
+    fontSize: '10.5px',
     cursor: 'pointer',
-    transition: 'all 0.2s',
-    fontWeight: '500',
+    fontWeight: '600',
   },
   inputRow: {
     display: 'flex',
     gap: '12px',
     alignItems: 'center',
-    backgroundColor: 'transparent', // Transparent input wrapper
-    border: '1.5px solid rgba(255, 255, 255, 0.35)', // Beveled highlight border
-    borderRadius: '30px',
-    padding: '6px 8px 6px 18px',
-    boxShadow: `
-      0 4px 16px rgba(0, 0, 0, 0.05),
-      inset 0 1px 0 rgba(255, 255, 255, 0.2)
-    `,
+    backgroundColor: '#1a3a5c', // Dark navy blue
+    border: '2px solid #2a5080',
+    borderRadius: '24px',
+    padding: '5px 5px 5px 16px',
+    boxShadow: '0 4px 20px rgba(10, 30, 70, 0.5), 0 1px 6px rgba(10, 30, 70, 0.35)',
   },
   textField: {
     flex: 1,
     background: 'none',
     border: 'none',
-    color: '#ffffff',
-    fontSize: '13.5px',
+    color: '#e8f0fe',
+    fontSize: '13px',
     outline: 'none',
     resize: 'none',
     padding: '6px 0',
@@ -507,20 +607,19 @@ export const styles = {
   },
   sendBtn: {
     border: 'none',
-    width: '36px',
-    height: '36px',
+    width: '34px',
+    height: '34px',
     borderRadius: '50%',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
     flexShrink: 0,
     transition: 'all 0.2s',
-    boxShadow: '0 2px 8px rgba(255, 255, 255, 0.1)',
   },
   infoFooter: {
     textAlign: 'center',
-    fontSize: '10px',
-    color: 'rgba(255, 255, 255, 0.45)',
+    fontSize: '9.5px',
+    color: '#627d98', // Muted steel blue-gray footer
     marginTop: '8px',
     fontWeight: '600',
     letterSpacing: '0.02em',
