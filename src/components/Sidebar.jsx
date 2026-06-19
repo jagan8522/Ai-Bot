@@ -9,7 +9,9 @@ import {
   Check,
   Cpu,
   Key,
-  X
+  X,
+  Globe,
+  Link
 } from 'lucide-react';
 import { styles } from '../styles';
 
@@ -21,17 +23,20 @@ export default function Sidebar({
   groqKey,
   onSaveKey,
   onClearKey,
-  pdfFile,
+  filesList,
   indexingState,
   indexingProgress,
   chunksCount,
   onFileSelected,
+  onLinkSubmitted,
+  onRemoveFile,
   onReset,
   isOpen = false,
   onClose,
 }) {
   const [showKey, setShowKey] = useState(false);
   const [isDragOver, setIsDragOver] = useState(false);
+  const [urlInput, setUrlInput] = useState('');
   const fileInputRef = useRef(null);
 
   // Drag and drop handlers
@@ -47,13 +52,13 @@ export default function Sidebar({
   const handleDrop = (e) => {
     e.preventDefault();
     setIsDragOver(false);
-    const file = e.dataTransfer.files[0];
-    if (file) onFileSelected(file);
+    const files = e.dataTransfer.files;
+    if (files && files.length > 0) onFileSelected(files);
   };
 
   const handleFileChange = (e) => {
-    const file = e.target.files[0];
-    if (file) onFileSelected(file);
+    const files = e.target.files;
+    if (files && files.length > 0) onFileSelected(files);
   };
 
   return (
@@ -203,49 +208,82 @@ export default function Sidebar({
         )}
       </div>
 
-      {/* Section: Document Parsing & Indexing */}
-      {pdfFile && (
+      {/* Section: Ingested Sources List */}
+      {filesList && filesList.length > 0 && (
         <div style={styles.card}>
           <h2 style={styles.cardTitle}>
-            <FileText size={14} style={{ marginRight: '6px', color: '#10b981' }} />
-            ACTIVE DOCUMENT
+            <Check size={14} style={{ marginRight: '6px', color: '#10b981' }} />
+            ACTIVE SOURCES ({filesList.length})
           </h2>
-          <div style={styles.fileDetailsCard}>
-            <div style={styles.fileInfoRow}>
-              <div style={{
-                width: '32px',
-                height: '32px',
-                borderRadius: '6px',
-                backgroundColor: 'rgba(16, 185, 129, 0.1)',
-                border: '1px solid rgba(16, 185, 129, 0.25)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                flexShrink: 0
-              }}>
-                <FileText size={16} color="#10b981" />
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', maxHeight: '160px', overflowY: 'auto', paddingRight: '4px' }} className="dark-scroll">
+            {filesList.map((file) => (
+              <div key={file.name} style={{ ...styles.fileDetailsCard, padding: '8px', marginBottom: 0 }}>
+                <div style={styles.fileInfoRow}>
+                  <div style={{
+                    width: '28px',
+                    height: '28px',
+                    borderRadius: '6px',
+                    backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                    border: '1px solid rgba(16, 185, 129, 0.25)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexShrink: 0
+                  }}>
+                    {file.isLink ? (
+                      <Globe size={14} color="#10b981" />
+                    ) : (
+                      <FileText size={14} color="#10b981" />
+                    )}
+                  </div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <p style={{ ...styles.fileName, fontSize: '11px' }} title={file.name}>{file.name}</p>
+                    <p style={{ ...styles.fileSize, fontSize: '9px', marginTop: '0px' }}>
+                      {file.isLink ? (
+                        `${(file.size / 1000).toFixed(1)}k chars`
+                      ) : (
+                        `${(file.size / 1024 / 1024).toFixed(2)} MB`
+                      )}
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => onRemoveFile(file.name)}
+                    style={{ ...styles.trashBtn, padding: '3px', borderRadius: '4px' }}
+                    title="Remove source"
+                    disabled={indexingState === 'embedding' || indexingState === 'parsing'}
+                  >
+                    <Trash2 size={12} />
+                  </button>
+                </div>
               </div>
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <p style={styles.fileName}>{pdfFile.name}</p>
-                <p style={styles.fileSize}>
-                  {(pdfFile.size / 1024 / 1024).toFixed(2)} MB
-                </p>
-              </div>
-              <button
-                onClick={onReset}
-                style={styles.trashBtn}
-                title="Remove document"
-                disabled={indexingState === 'embedding' || indexingState === 'parsing'}
-              >
-                <Trash2 size={14} />
-              </button>
-            </div>
+            ))}
           </div>
+          
+          <button
+            onClick={onReset}
+            style={{
+              marginTop: '8px',
+              width: '100%',
+              padding: '6px 10px',
+              fontSize: '10px',
+              fontWeight: '700',
+              color: '#ef4444',
+              backgroundColor: 'rgba(239, 68, 68, 0.08)',
+              border: '1px solid rgba(239, 68, 68, 0.2)',
+              borderRadius: '8px',
+              cursor: 'pointer',
+              transition: 'all 0.2s',
+            }}
+            className="interactive-btn"
+            disabled={indexingState === 'embedding' || indexingState === 'parsing'}
+          >
+            Clear All Sources
+          </button>
         </div>
       )}
 
       {/* Section: Vector Computation */}
-      {(chunksCount > 0 || indexingState === 'embedding' || indexingState === 'parsing') && (
+      {(indexingState === 'embedding' || indexingState === 'parsing') && (
         <div style={styles.card}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
             <h2 style={styles.cardTitle}>
@@ -253,7 +291,7 @@ export default function Sidebar({
               VECTOR COMPUTATION
             </h2>
             <span style={styles.percentLabel}>
-              {indexingState === 'done' ? '100%' : `${indexingProgress}%`}
+              {indexingProgress}%
             </span>
           </div>
 
@@ -261,56 +299,87 @@ export default function Sidebar({
             <div
               style={{
                 ...styles.greenProgressBar,
-                width: indexingState === 'done' ? '100%' : `${indexingProgress}%`
+                width: `${indexingProgress}%`
               }}
             />
           </div>
-
-          {chunksCount > 0 && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '12px' }}>
-              <div style={styles.vectorBadge}>
-                {chunksCount} Semantic Chunks (30 words)
-              </div>
-              <div style={styles.vectorBadge}>
-                <span style={styles.pulseGreenDot} /> All text chunk vectors are computed
-              </div>
-            </div>
-          )}
         </div>
       )}
 
-      {/* Fallback Ingestion Dropzone when no PDF is loaded */}
-      {!pdfFile && (
-        <div style={{ ...styles.card, flex: 1, display: 'flex', flexDirection: 'column' }}>
-          <h2 style={styles.cardTitle}>
-            <FileText size={14} style={{ marginRight: '6px' }} />
-            PDF Ingestion
-          </h2>
-          <div
-            onDragOver={handleDragOver}
-            onDragLeave={handleDragLeave}
-            onDrop={handleDrop}
-            onClick={() => fileInputRef.current.click()}
-            className={isDragOver ? 'drag-over' : ''}
-            style={styles.dropZone}
-          >
-            <UploadCloud size={32} color={isDragOver ? '#38bdf8' : '#64748b'} style={{ marginBottom: '10px' }} />
-            <p style={{ fontSize: '13px', fontWeight: '500', marginBottom: '4px', color: '#ffffff' }}>
-              Drag & Drop PDF Here
-            </p>
-            <p style={{ fontSize: '11px', color: '#64748b' }}>
-              or click to browse local files
-            </p>
+      {/* Add Document/Link Card (always visible for adding more sources) */}
+      <div style={{ ...styles.card, display: 'flex', flexDirection: 'column' }}>
+        <h2 style={styles.cardTitle}>
+          <UploadCloud size={14} style={{ marginRight: '6px' }} />
+          ADD SOURCE DOCUMENT
+        </h2>
+        <div
+          onDragOver={handleDragOver}
+          onDragLeave={handleDragLeave}
+          onDrop={handleDrop}
+          onClick={() => fileInputRef.current.click()}
+          className={isDragOver ? 'drag-over' : ''}
+          style={{ ...styles.dropZone, padding: '14px 10px' }}
+        >
+          <UploadCloud size={24} color={isDragOver ? '#38bdf8' : '#64748b'} style={{ marginBottom: '6px' }} />
+          <p style={{ fontSize: '11px', fontWeight: '600', marginBottom: '2px', color: '#ffffff', textAlign: 'center' }}>
+            Drag & Drop PDF, PPTX, DOCX, TXT Here
+          </p>
+          <p style={{ fontSize: '9px', color: '#64748b', textAlign: 'center' }}>
+            or click to browse local files (multiple allowed)
+          </p>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept=".pdf,.pptx,.docx,.txt"
+            multiple
+            onChange={handleFileChange}
+            style={{ display: 'none' }}
+          />
+        </div>
+
+        {/* Website Link Ingestion Form */}
+        <div style={{ marginTop: '12px', borderTop: '1px solid rgba(255, 255, 255, 0.06)', paddingTop: '12px' }}>
+          <h3 style={{ ...styles.cardTitle, fontSize: '10px', marginBottom: '6px' }}>
+            <Link size={11} style={{ marginRight: '6px' }} />
+            WEBSITE URL INGESTION
+          </h3>
+          <div style={styles.inputWrapper}>
             <input
-              ref={fileInputRef}
-              type="file"
-              accept=".pdf"
-              onChange={handleFileChange}
-              style={{ display: 'none' }}
+              type="text"
+              placeholder="https://example.com"
+              value={urlInput}
+              onChange={(e) => setUrlInput(e.target.value)}
+              style={{ ...styles.apiInput, paddingRight: '56px', fontSize: '11px', padding: '6px 10px' }}
             />
+            <button
+              type="button"
+              onClick={() => {
+                if (urlInput.trim()) {
+                  onLinkSubmitted(urlInput.trim());
+                  setUrlInput('');
+                }
+              }}
+              disabled={!urlInput.trim() || indexingState === 'embedding' || indexingState === 'parsing'}
+              style={{
+                position: 'absolute',
+                right: '4px',
+                backgroundColor: urlInput.trim() ? '#ffd700' : 'rgba(255, 255, 255, 0.1)',
+                color: urlInput.trim() ? '#1e2530' : 'rgba(255, 255, 255, 0.3)',
+                border: 'none',
+                borderRadius: '4px',
+                padding: '3px 8px',
+                fontSize: '10px',
+                fontWeight: '700',
+                cursor: urlInput.trim() ? 'pointer' : 'not-allowed',
+                transition: 'all 0.2s',
+              }}
+              className="interactive-btn"
+            >
+              Fetch
+            </button>
           </div>
         </div>
-      )}
+      </div>
 
       {/* Quick FAQ / Helper note */}
       <div style={styles.helperNote} className="sidebar-helper-note">

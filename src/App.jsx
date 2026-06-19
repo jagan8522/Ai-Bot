@@ -5,6 +5,10 @@ import ChatWindow from './components/ChatWindow';
 import { styles, globalStyles } from './styles';
 import {
   extractTextFromPDF,
+  extractTextFromPPTX,
+  extractTextFromDOCX,
+  extractTextFromTXT,
+  extractTextFromURL,
   chunkText,
   retrieveRelevantChunks
 } from './utils/rag';
@@ -32,8 +36,7 @@ function App() {
   const [modelProgress, setModelProgress] = useState('Initializing embedder...');
   const [modelPercent, setModelPercent] = useState(0); // -1 for indeterminate/shimmer, 0-100 for percent
   const [groqKey, setGroqKey] = useState(() => localStorage.getItem('groq_api_key') || '');
-  const [pdfFile, setPdfFile] = useState(null);
-  const [pdfText, setPdfText] = useState('');
+  const [filesList, setFilesList] = useState([]);
   const [chunks, setChunks] = useState([]);
   const [indexingState, setIndexingState] = useState('idle'); // 'idle', 'parsing', 'embedding', 'done', 'error'
   const [indexingProgress, setIndexingProgress] = useState(0);
@@ -195,40 +198,101 @@ function App() {
     localStorage.removeItem('groq_api_key');
   };
 
-  // Orchestrate PDF Text parsing & Chunking
-  const handleFileSelected = async (file) => {
-    setPdfFile(file);
+  // Orchestrate file text parsing & Chunking
+  const handleFileSelected = async (files) => {
+    if (!files) return;
+    
+    // Support single file or file list
+    const fileArray = files instanceof FileList ? Array.from(files) : Array.isArray(files) ? files : [files];
+    if (fileArray.length === 0) return;
+    
     setIndexingState('parsing');
-    setChunks([]);
+    setIndexingProgress(0);
 
+    for (let index = 0; index < fileArray.length; index++) {
+      const file = fileArray[index];
+      try {
+        const fileName = file.name.toLowerCase();
+        let fullText = '';
+
+        if (fileName.endsWith('.pdf')) {
+          fullText = await extractTextFromPDF(file);
+        } else if (fileName.endsWith('.pptx')) {
+          fullText = await extractTextFromPPTX(file);
+        } else if (fileName.endsWith('.docx')) {
+          fullText = await extractTextFromDOCX(file);
+        } else if (fileName.endsWith('.txt')) {
+          fullText = await extractTextFromTXT(file);
+        } else {
+          alert(`Unsupported file type: ${file.name}. Skipping...`);
+          continue;
+        }
+
+        if (!fullText || !fullText.trim()) {
+          alert(`No extractable text found in ${file.name}. Skipping...`);
+          continue;
+        }
+
+        const generatedChunks = chunkText(fullText, 300, 50);
+        if (generatedChunks.length === 0) {
+          alert(`No text chunks could be extracted from ${file.name}. Skipping...`);
+          continue;
+        }
+
+        // Await each sequentially so the progress bar updates properly
+        await embedAndIndexChunks(generatedChunks, file.name, file);
+      } catch (err) {
+        console.error(err);
+        alert(`Error reading document ${file.name}: ${err.message}`);
+      }
+    }
+    
+    setIndexingState('done');
+  };
+
+  // Orchestrate website text scraping & Chunking
+  const handleLinkSubmitted = async (url) => {
+    if (!url || !url.trim()) return;
+    
+    // Clean URL
+    let cleanUrl = url.trim();
+    if (!/^https?:\/\//i.test(cleanUrl)) {
+      cleanUrl = 'https://' + cleanUrl;
+    }
+    
+    // Create a mock file object representing the link
+    const mockLinkFile = {
+      name: cleanUrl,
+      size: 0,
+      isLink: true
+    };
+    
+    setIndexingState('parsing');
+    
     try {
-      // 1. Extract text using pdf.js utility
-      const fullText = await extractTextFromPDF(file);
-
-      if (!fullText.trim()) {
-        throw new Error("This PDF seems to have no extractable text. Scanned PDFs are not supported.");
+      const fullText = await extractTextFromURL(cleanUrl);
+      
+      if (!fullText || !fullText.trim()) {
+        throw new Error("Could not extract any readable text from this website.");
       }
-
-      setPdfText(fullText);
-
-      // 2. Perform word-based chunking with overlap utility
+      
+      mockLinkFile.size = fullText.length; // character count
+      
       const generatedChunks = chunkText(fullText, 300, 50);
-
       if (generatedChunks.length === 0) {
-        throw new Error("No text chunks could be extracted from this document.");
+        throw new Error("No text chunks could be extracted from this website content.");
       }
-
-      // 3. Start local embedding generation
-      embedAndIndexChunks(generatedChunks, file.name);
+      
+      await embedAndIndexChunks(generatedChunks, cleanUrl, mockLinkFile);
     } catch (err) {
       console.error(err);
-      alert(`Error reading PDF: ${err.message}`);
+      alert(`Error indexing website: ${err.message}`);
       setIndexingState('error');
     }
   };
 
   // Generate Embeddings using local Xenova model
-  const embedAndIndexChunks = async (rawChunks, filename) => {
+  const embedAndIndexChunks = async (rawChunks, filename, fileObj) => {
     if (!embedderRef.current) {
       alert('AI Embedding Model is not ready yet. Please wait for it to load.');
       return;
@@ -237,6 +301,7 @@ function App() {
     setIndexingState('embedding');
     setIndexingProgress(0);
     const embeddedChunks = [];
+    const baseId = Date.now();
 
     try {
       for (let i = 0; i < rawChunks.length; i++) {
@@ -252,13 +317,18 @@ function App() {
         });
 
         embeddedChunks.push({
-          id: chunk.id,
+          id: `${baseId}-${i}`,
           text: chunk.text,
-          vector: Array.from(output.data)
+          vector: Array.from(output.data),
+          source: filename
         });
       }
 
-      setChunks(embeddedChunks);
+      setChunks(prev => [...prev, ...embeddedChunks]);
+      setFilesList(prev => {
+        const filtered = prev.filter(f => f.name !== filename);
+        return [...filtered, fileObj];
+      });
       setIndexingProgress(100);
       setIndexingState('done');
 
@@ -277,6 +347,22 @@ function App() {
       alert('An error occurred during local embedding generation.');
       setIndexingState('error');
     }
+  };
+
+  // Remove a specific active file/link and its chunks
+  const handleRemoveFile = (filename) => {
+    setFilesList(prev => prev.filter(f => f.name !== filename));
+    setChunks(prev => prev.filter(c => c.source !== filename));
+    
+    setChatMessages(prev => [
+      ...prev,
+      {
+        id: Date.now(),
+        sender: 'system',
+        text: `Removed "${filename}" and cleared all its associated vector chunks from the database.`,
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      }
+    ]);
   };
 
   // Submit query to Groq
@@ -428,8 +514,7 @@ function App() {
   };
 
   const resetAll = () => {
-    setPdfFile(null);
-    setPdfText('');
+    setFilesList([]);
     setChunks([]);
     setIndexingState('idle');
     setIndexingProgress(0);
@@ -437,7 +522,7 @@ function App() {
       {
         id: Date.now(),
         sender: 'bot',
-        text: "Reset successful. Upload a new PDF document to begin searching!",
+        text: "Reset successful. All indexed documents and links have been cleared. Upload new sources to begin!",
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
       }
     ]);
@@ -467,11 +552,13 @@ function App() {
           groqKey={groqKey}
           onSaveKey={handleSaveKey}
           onClearKey={handleClearKey}
-          pdfFile={pdfFile}
+          filesList={filesList}
           indexingState={indexingState}
           indexingProgress={indexingProgress}
           chunksCount={chunks.length}
           onFileSelected={handleFileSelected}
+          onLinkSubmitted={handleLinkSubmitted}
+          onRemoveFile={handleRemoveFile}
           onReset={resetAll}
           isOpen={sidebarOpen}
           onClose={() => setSidebarOpen(false)}
@@ -479,7 +566,7 @@ function App() {
 
         {/* Chat Window Stream */}
         <ChatWindow
-          pdfFile={pdfFile}
+          filesList={filesList}
           chatMessages={chatMessages}
           isGenerating={isGenerating}
           groqKey={groqKey}

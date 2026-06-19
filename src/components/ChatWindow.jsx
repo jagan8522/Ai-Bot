@@ -106,7 +106,7 @@ function formatMessageText(text) {
 }
 
 export default function ChatWindow({
-  pdfFile,
+  filesList,
   chatMessages,
   isGenerating,
   groqKey,
@@ -170,18 +170,23 @@ export default function ChatWindow({
           </button>
 
           <div style={styles.chatHeaderTitle}>
-            <MessageSquare size={18} color="#5c544d" />
             <span className="chat-header-title-text">CONVERSATION STREAM</span>
           </div>
         </div>
-        {pdfFile && (
-          <div style={styles.currentFileIndicator}>
+        {filesList && filesList.length > 0 && (
+          <div 
+            style={styles.currentFileIndicator}
+            title={filesList.map(f => f.name).join(', ')}
+          >
             <div style={styles.greenPulseDot} />
             <span
               className="file-indicator-text"
               style={{ fontSize: '11px', fontWeight: '700', color: '#15803d' }}
             >
-              Connected to {pdfFile.name}
+              {filesList.length === 1 
+                ? `Connected to ${filesList[0].name}` 
+                : `Connected to ${filesList.length} sources`
+              }
             </span>
           </div>
         )}
