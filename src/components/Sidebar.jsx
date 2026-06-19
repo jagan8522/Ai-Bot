@@ -8,7 +8,8 @@ import {
   AlertCircle,
   Check,
   Cpu,
-  Key
+  Key,
+  X
 } from 'lucide-react';
 import { styles } from '../styles';
 
@@ -25,7 +26,9 @@ export default function Sidebar({
   indexingProgress,
   chunksCount,
   onFileSelected,
-  onReset
+  onReset,
+  isOpen = false,
+  onClose,
 }) {
   const [showKey, setShowKey] = useState(false);
   const [isDragOver, setIsDragOver] = useState(false);
@@ -54,16 +57,31 @@ export default function Sidebar({
   };
 
   return (
-    <aside style={styles.sidebar} className="dark-scroll">
+    <aside
+      style={styles.sidebar}
+      className={`dark-scroll app-sidebar${isOpen ? ' open' : ''}`}
+    >
       {/* Header */}
-      <div style={styles.sidebarHeader}>
-        <div style={styles.logoBadge}>
-          <FileText size={20} color="#ffd700" />
+      <div style={{ ...styles.sidebarHeader, justifyContent: 'space-between' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <div style={styles.logoBadge}>
+            <FileText size={20} color="#ffd700" />
+          </div>
+          <div>
+            <h1 style={styles.sidebarTitle}>Semantic Doc Q&A</h1>
+            <span style={styles.sidebarSubtitle}>RAG SYSTEM</span>
+          </div>
         </div>
-        <div>
-          <h1 style={styles.sidebarTitle}>Semantic Doc Q&A</h1>
-          <span style={styles.sidebarSubtitle}>RAG SYSTEM</span>
-        </div>
+
+        {/* Close button — only visible on mobile via CSS */}
+        <button
+          className="sidebar-close-btn"
+          onClick={onClose}
+          aria-label="Close sidebar"
+          title="Close sidebar"
+        >
+          <X size={18} />
+        </button>
       </div>
 
       {/* Section: Embedding Model Status */}
@@ -295,7 +313,7 @@ export default function Sidebar({
       )}
 
       {/* Quick FAQ / Helper note */}
-      <div style={styles.helperNote}>
+      <div style={styles.helperNote} className="sidebar-helper-note">
         <AlertCircle size={12} style={{ flexShrink: 0, marginTop: '2px' }} />
         <span>
           All text chunk vectors are computed locally inside your browser cache. Zero documents are uploaded to a external vector database.

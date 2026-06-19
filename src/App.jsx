@@ -37,6 +37,7 @@ function App() {
   const [chunks, setChunks] = useState([]);
   const [indexingState, setIndexingState] = useState('idle'); // 'idle', 'parsing', 'embedding', 'done', 'error'
   const [indexingProgress, setIndexingProgress] = useState(0);
+  const [sidebarOpen, setSidebarOpen] = useState(false); // Mobile sidebar drawer state
   const [chatMessages, setChatMessages] = useState([
     {
       id: 1,
@@ -451,6 +452,12 @@ function App() {
 
       {/* Main app panel */}
       <div style={styles.appContainer}>
+        {/* Mobile sidebar backdrop overlay — must be INSIDE appContainer to share stacking context with Sidebar */}
+        <div
+          className={`sidebar-overlay${sidebarOpen ? ' visible' : ''}`}
+          onClick={() => setSidebarOpen(false)}
+        />
+
         {/* Configuration Sidebar */}
         <Sidebar
           modelState={modelState}
@@ -466,6 +473,8 @@ function App() {
           chunksCount={chunks.length}
           onFileSelected={handleFileSelected}
           onReset={resetAll}
+          isOpen={sidebarOpen}
+          onClose={() => setSidebarOpen(false)}
         />
 
         {/* Chat Window Stream */}
@@ -478,6 +487,7 @@ function App() {
           inputValue={inputValue}
           onInputChange={setInputValue}
           onSend={handleSend}
+          onOpenSidebar={() => setSidebarOpen(true)}
         />
       </div>
     </div>

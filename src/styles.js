@@ -1,6 +1,10 @@
 // Visual style definitions for the Semantic Doc Q&A App matching the screenshot design
 
 export const globalStyles = `
+  *, *::before, *::after {
+    box-sizing: border-box;
+  }
+
   body {
     background: #c8d5e0; /* Muted soft blue-gray background */
     margin: 0;
@@ -140,6 +144,256 @@ export const globalStyles = `
   /* Dark blue search bar placeholder */
   .dark-input-field::placeholder {
     color: rgba(200, 214, 233, 0.55);
+  }
+
+  /* ─── Hamburger / Menu Toggle Button ─── */
+  .hamburger-btn {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border: none;
+    border-radius: 8px;
+    background: rgba(30, 41, 59, 0.85);
+    color: #eab308;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: background 0.2s, transform 0.15s;
+    z-index: 200;
+  }
+  .hamburger-btn:hover {
+    background: rgba(30, 41, 59, 1);
+    transform: scale(1.05);
+  }
+  .hamburger-btn svg {
+    display: block;
+  }
+
+  /* ─── Sidebar Close (✕) Button — hidden on desktop, shown on mobile ─── */
+  .sidebar-close-btn {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border: 1px solid rgba(255, 215, 0, 0.35);
+    border-radius: 8px;
+    background: rgba(255, 215, 0, 0.08);
+    color: #ffd700;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: background 0.2s, color 0.2s, transform 0.15s;
+  }
+  .sidebar-close-btn:hover {
+    background: rgba(255, 215, 0, 0.18);
+    color: #ffd700;
+    transform: scale(1.08);
+  }
+  .sidebar-close-btn svg {
+    display: block;
+  }
+
+  /* ─── Sidebar overlay backdrop (mobile) ─── */
+  .sidebar-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.35);
+    z-index: 150;
+    animation: fadeIn 0.2s ease;
+    /* Don't block touch/scroll events on the sidebar itself */
+    pointer-events: auto;
+    touch-action: none;
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+  }
+  .sidebar-overlay.visible {
+    display: block;
+  }
+
+  /* ─── Responsive Sidebar ─── */
+  .app-sidebar {
+    transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  /* ─── File indicator — truncate on small screens ─── */
+  .file-indicator-text {
+    max-width: 140px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* ════════════════════════════════════════════════
+     RESPONSIVE BREAKPOINTS
+     ════════════════════════════════════════════════ */
+
+  /* ── Tablet landscape / small laptop: 769px – 1024px ── */
+  @media (max-width: 1024px) {
+    .app-sidebar {
+      width: 280px !important;
+    }
+  }
+
+  /* ── Tablet portrait: 481px – 768px ── */
+  @media (max-width: 768px) {
+    body {
+      overflow: hidden;
+    }
+
+    /* Hamburger visible */
+    .hamburger-btn {
+      display: flex;
+    }
+
+    /* Sidebar close button visible on mobile */
+    .sidebar-close-btn {
+      display: flex;
+    }
+
+    /* Sidebar becomes a fixed off-canvas drawer */
+    .app-sidebar {
+      position: fixed !important;
+      top: 0 !important;
+      left: 0 !important;
+      height: 100vh !important;
+      width: 300px !important;
+      z-index: 160 !important;
+      transform: translateX(-100%);
+      box-shadow: 4px 0 30px rgba(0, 0, 0, 0.35);
+      /* Enable independent scrolling inside the sidebar */
+      overflow-y: auto !important;
+      overflow-x: hidden !important;
+      -webkit-overflow-scrolling: touch;
+      overscroll-behavior: contain;
+      pointer-events: auto;
+    }
+    .app-sidebar.open {
+      transform: translateX(0);
+    }
+
+    /* Fix helper note inside scrollable drawer — don't push to infinity */
+    .app-sidebar .sidebar-helper-note {
+      margin-top: 16px !important;
+    }
+
+    /* Chat header adjusts for hamburger */
+    .chat-header-responsive {
+      padding: 0 12px !important;
+      gap: 8px;
+    }
+
+    .chat-header-title-text {
+      font-size: 11px !important;
+      letter-spacing: 0.04em !important;
+    }
+
+    .file-indicator-text {
+      max-width: 110px;
+    }
+
+    /* Messages area */
+    .messages-box-responsive {
+      padding: 14px 12px !important;
+    }
+
+    /* Input area */
+    .input-area-responsive {
+      padding: 10px 12px !important;
+    }
+
+    /* Sample buttons wrap nicely */
+    .sample-questions-row {
+      gap: 5px !important;
+    }
+    .sample-btn-responsive {
+      font-size: 10px !important;
+      padding: 5px 10px !important;
+    }
+
+    /* Message bubbles take more width on mobile */
+    .message-bubble-responsive {
+      max-width: 92% !important;
+    }
+
+    /* Info footer hides on very narrow */
+    .info-footer-responsive {
+      font-size: 8.5px !important;
+    }
+  }
+
+  /* ── Mobile portrait: ≤ 480px ── */
+  @media (max-width: 480px) {
+    .app-sidebar {
+      width: 88vw !important;
+      max-width: 320px !important;
+    }
+
+    .chat-header-responsive {
+      padding: 0 10px !important;
+    }
+
+    .chat-header-title-text {
+      display: none !important;   /* hide text, keep icon */
+    }
+
+    .file-indicator-text {
+      max-width: 80px;
+    }
+
+    .messages-box-responsive {
+      padding: 10px 8px !important;
+      gap: 12px !important;
+    }
+
+    .input-area-responsive {
+      padding: 8px 8px !important;
+    }
+
+    .input-row-responsive {
+      border-radius: 18px !important;
+      padding: 4px 4px 4px 12px !important;
+    }
+
+    .text-field-responsive {
+      font-size: 12px !important;
+    }
+
+    .message-bubble-responsive {
+      max-width: 96% !important;
+      padding: 10px 12px !important;
+    }
+
+    .info-footer-responsive {
+      display: none !important;  /* too small, hide footer text */
+    }
+
+    /* Sample prompts — stack vertically */
+    .sample-questions-row {
+      flex-direction: column !important;
+      align-items: flex-start !important;
+    }
+  }
+
+  /* ── Very small: ≤ 360px ── */
+  @media (max-width: 360px) {
+    .app-sidebar {
+      width: 95vw !important;
+    }
+    .send-btn-responsive {
+      width: 30px !important;
+      height: 30px !important;
+    }
+  }
+
+  /* ── Large screen (≥ 1280px): wider sidebar ── */
+  @media (min-width: 1280px) {
+    .app-sidebar {
+      width: 340px !important;
+    }
   }
 `;
 
@@ -380,7 +634,9 @@ export const styles = {
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: 'rgba(239, 68, 68, 0.08)',
-    border: '1px solid rgba(239, 68, 68, 0.15)',
+    borderWidth: '1px',
+    borderStyle: 'solid',
+    borderColor: 'rgba(239, 68, 68, 0.15)',
   },
   indexingProgressBarContainer: {
     height: '5px',
@@ -450,6 +706,7 @@ export const styles = {
     backdropFilter: 'blur(20px)',
     WebkitBackdropFilter: 'blur(20px)',
     boxSizing: 'border-box',
+    minWidth: 0, // prevent flex overflow
   },
   chatHeader: {
     height: '56px',
@@ -461,6 +718,7 @@ export const styles = {
     flexShrink: 0,
     backgroundColor: 'transparent',
     boxSizing: 'border-box',
+    gap: '8px',
   },
   chatHeaderTitle: {
     display: 'flex',
@@ -471,6 +729,7 @@ export const styles = {
     color: '#334e68', // Muted steel blue
     textTransform: 'uppercase',
     letterSpacing: '0.06em',
+    minWidth: 0,
   },
   currentFileIndicator: {
     display: 'flex',
@@ -480,6 +739,7 @@ export const styles = {
     border: '1px solid #bcccdc',
     padding: '4px 10px',
     borderRadius: '30px',
+    flexShrink: 0,
   },
   greenPulseDot: {
     width: '6px',
@@ -487,6 +747,7 @@ export const styles = {
     borderRadius: '50%',
     backgroundColor: '#10b981',
     boxShadow: '0 0 6px #10b981',
+    flexShrink: 0,
   },
   messagesBox: {
     flex: 1,
@@ -604,6 +865,7 @@ export const styles = {
     padding: '6px 0',
     fontFamily: 'inherit',
     lineHeight: '1.4',
+    minWidth: 0,
   },
   sendBtn: {
     border: 'none',
