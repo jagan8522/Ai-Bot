@@ -5,13 +5,17 @@ export const globalStyles = `
     box-sizing: border-box;
   }
 
-  body {
-    background: #c8d5e0; /* Muted soft blue-gray background */
+  html, body, #root {
     margin: 0;
     padding: 0;
-    overflow: hidden;
-    height: 100vh;
     width: 100vw;
+    height: 100vh;
+    height: 100dvh;
+    overflow: hidden;
+  }
+
+  body {
+    background: #c8d5e0; /* Muted soft blue-gray background */
     display: flex;
     justify-content: center;
     align-items: center;
@@ -23,12 +27,8 @@ export const globalStyles = `
     display: flex;
     justify-content: center;
     align-items: center;
-    width: 100%;
-    height: 100%;
-    padding: 0;
     box-sizing: border-box;
     position: relative;
-    overflow: hidden;
     z-index: 1;
   }
   
@@ -260,6 +260,7 @@ export const globalStyles = `
       top: 0 !important;
       left: 0 !important;
       height: 100vh !important;
+      height: 100dvh !important;
       width: 300px !important;
       z-index: 160 !important;
       transform: translateX(-100%);
@@ -410,7 +411,7 @@ export const styles = {
   appContainer: {
     display: 'flex',
     width: '100vw',
-    height: '100vh',
+    height: '100%',
     background: 'transparent',
     borderRadius: '0px',
     overflow: 'hidden',
@@ -719,6 +720,12 @@ export const styles = {
     backgroundColor: 'transparent',
     boxSizing: 'border-box',
     gap: '8px',
+  },
+  chatHeaderLeft: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '12px',
+    minWidth: 0,
   },
   chatHeaderTitle: {
     display: 'flex',

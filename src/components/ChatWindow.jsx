@@ -158,19 +158,21 @@ export default function ChatWindow({
     <main style={styles.chatContainer}>
       {/* Chat Header */}
       <header style={styles.chatHeader} className="chat-header-responsive">
-        {/* Hamburger — only visible on mobile via CSS */}
-        <button
-          className="hamburger-btn"
-          onClick={onOpenSidebar}
-          aria-label="Open sidebar"
-          title="Open sidebar"
-        >
-          <Menu size={18} />
-        </button>
+        <div style={styles.chatHeaderLeft}>
+          {/* Hamburger — only visible on mobile via CSS */}
+          <button
+            className="hamburger-btn"
+            onClick={onOpenSidebar}
+            aria-label="Open sidebar"
+            title="Open sidebar"
+          >
+            <Menu size={18} />
+          </button>
 
-        <div style={styles.chatHeaderTitle}>
-          <MessageSquare size={18} color="#5c544d" />
-          <span className="chat-header-title-text">CONVERSATION STREAM</span>
+          <div style={styles.chatHeaderTitle}>
+            <MessageSquare size={18} color="#5c544d" />
+            <span className="chat-header-title-text">CONVERSATION STREAM</span>
+          </div>
         </div>
         {pdfFile && (
           <div style={styles.currentFileIndicator}>
