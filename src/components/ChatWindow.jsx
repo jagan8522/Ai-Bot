@@ -1,5 +1,5 @@
 import React, { useRef, useEffect } from 'react';
-import { MessageSquare, RefreshCw, Send, Sparkles } from 'lucide-react';
+import { MessageSquare, RefreshCw, Send, Sparkles, Menu } from 'lucide-react';
 import { styles } from '../styles';
 
 // Lightweight, robust parsing utility to render bold headings and lists in chat answers
@@ -113,7 +113,8 @@ export default function ChatWindow({
   chunksCount,
   inputValue,
   onInputChange,
-  onSend
+  onSend,
+  onOpenSidebar,
 }) {
   const messagesBoxRef = useRef(null);
   const textareaRef = useRef(null);
@@ -156,15 +157,28 @@ export default function ChatWindow({
   return (
     <main style={styles.chatContainer}>
       {/* Chat Header */}
-      <header style={styles.chatHeader}>
+      <header style={styles.chatHeader} className="chat-header-responsive">
+        {/* Hamburger — only visible on mobile via CSS */}
+        <button
+          className="hamburger-btn"
+          onClick={onOpenSidebar}
+          aria-label="Open sidebar"
+          title="Open sidebar"
+        >
+          <Menu size={18} />
+        </button>
+
         <div style={styles.chatHeaderTitle}>
           <MessageSquare size={18} color="#5c544d" />
-          <span>CONVERSATION STREAM</span>
+          <span className="chat-header-title-text">CONVERSATION STREAM</span>
         </div>
         {pdfFile && (
           <div style={styles.currentFileIndicator}>
             <div style={styles.greenPulseDot} />
-            <span style={{ fontSize: '11px', fontWeight: '700', color: '#15803d' }}>
+            <span
+              className="file-indicator-text"
+              style={{ fontSize: '11px', fontWeight: '700', color: '#15803d' }}
+            >
               Connected to {pdfFile.name}
             </span>
           </div>
@@ -172,7 +186,7 @@ export default function ChatWindow({
       </header>
 
       {/* Message Feed */}
-      <div ref={messagesBoxRef} style={styles.messagesBox}>
+      <div ref={messagesBoxRef} style={styles.messagesBox} className="messages-box-responsive">
         {chatMessages.map((msg) => (
           <div
             key={msg.id}
@@ -182,6 +196,7 @@ export default function ChatWindow({
             }}
           >
             <div
+              className="message-bubble-responsive"
               style={{
                 ...styles.messageBubble,
                 ...(msg.sender === 'user' ? styles.userBubble :
@@ -232,14 +247,14 @@ export default function ChatWindow({
       </div>
 
       {/* Bottom Input Area */}
-      <div style={styles.inputArea}>
+      <div style={styles.inputArea} className="input-area-responsive">
         {/* Sample Questions when document is loaded but empty chat */}
         {chunksCount > 0 && chatMessages.length <= 2 && (
           <div style={styles.sampleQuestionsContainer}>
             <span style={{ fontSize: '10px', color: '#8c8276', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
               Suggested prompts:
             </span>
-            <div style={styles.sampleQuestionsRow}>
+            <div style={styles.sampleQuestionsRow} className="sample-questions-row">
               <button
                 onClick={() => onInputChange("Summarize the key findings in this document.")}
                 style={styles.sampleBtn}
@@ -266,7 +281,7 @@ export default function ChatWindow({
         )}
 
         {/* Input box pill capsule */}
-        <div style={styles.inputRow}>
+        <div style={styles.inputRow} className="input-row-responsive">
           <textarea
             ref={textareaRef}
             placeholder={
@@ -279,7 +294,7 @@ export default function ChatWindow({
             onKeyDown={handleKeyPress}
             disabled={chunksCount === 0 || !groqKey || isGenerating}
             style={styles.textField}
-            className="dark-input-field"
+            className="dark-input-field text-field-responsive"
             rows={1}
           />
 
@@ -297,7 +312,7 @@ export default function ChatWindow({
           <button
             onClick={onSend}
             disabled={!inputValue.trim() || chunksCount === 0 || !groqKey || isGenerating}
-            className="interactive-btn"
+            className="interactive-btn send-btn-responsive"
             style={{
               ...styles.sendBtn,
               backgroundColor: (inputValue.trim() && chunksCount > 0 && groqKey && !isGenerating) ? '#8b1d55' : 'rgba(139, 29, 85, 0.12)',
@@ -308,7 +323,7 @@ export default function ChatWindow({
             <Send size={15} style={{ marginLeft: '-1px' }} />
           </button>
         </div>
-        <div style={styles.infoFooter}>
+        <div style={styles.infoFooter} className="info-footer-responsive">
           Level 2 RAG • 384-Dim Local Embeddings via WebAssembly • Streamed Answers via Llama 3.1
         </div>
       </div>
