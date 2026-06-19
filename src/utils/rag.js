@@ -12,7 +12,7 @@ pdfjsLib.GlobalWorkerOptions.workerPort = new PDFWorker();
 export async function extractTextFromPDF(file) {
   const buffer = await file.arrayBuffer();
   const pdf = await pdfjsLib.getDocument({ data: buffer }).promise;
-  
+
   let fullText = '';
   for (let i = 1; i <= pdf.numPages; i++) {
     const page = await pdf.getPage(i);
@@ -33,7 +33,7 @@ export async function extractTextFromPDF(file) {
 export function chunkText(text, size = 300, overlap = 50) {
   const words = text.split(/\s+/).filter(Boolean);
   const chunksArray = [];
-  
+
   for (let i = 0; i < words.length; i += (size - overlap)) {
     const chunkWords = words.slice(i, i + size);
     chunksArray.push({
@@ -69,7 +69,7 @@ export function calculateCosineSimilarity(vecA, vecB) {
  */
 export async function retrieveRelevantChunks(embedder, chunks, question, topK = 3) {
   if (!embedder) throw new Error("Embedder not loaded");
-  
+
   // 1. Embed the user's question
   const output = await embedder(question, {
     pooling: 'mean',

@@ -3,11 +3,13 @@ import { pipeline, env } from '@xenova/transformers';
 import Sidebar from './components/Sidebar';
 import ChatWindow from './components/ChatWindow';
 import { styles, globalStyles } from './styles';
-import { 
-  extractTextFromPDF, 
-  chunkText, 
-  retrieveRelevantChunks 
+import {
+  extractTextFromPDF,
+  chunkText,
+  retrieveRelevantChunks
 } from './utils/rag';
+
+
 
 // Force Transformers.js to fetch models from CDN and bypass local Vite SPA route fallback
 env.allowLocalModels = false;
@@ -22,6 +24,8 @@ const globalProgressCallback = (data) => {
     activeProgressCallback(data);
   }
 };
+
+
 
 function App() {
   const [modelState, setModelState] = useState('idle'); // 'idle', 'loading', 'ready', 'error'
@@ -205,10 +209,10 @@ function App() {
       }
 
       setPdfText(fullText);
-      
+
       // 2. Perform word-based chunking with overlap utility
       const generatedChunks = chunkText(fullText, 300, 50);
-      
+
       if (generatedChunks.length === 0) {
         throw new Error("No text chunks could be extracted from this document.");
       }
@@ -239,7 +243,7 @@ function App() {
         setIndexingProgress(progress);
 
         const chunk = rawChunks[i];
-        
+
         // Generate embedding via model
         const output = await embedderRef.current(chunk.text, {
           pooling: 'mean',
@@ -256,7 +260,7 @@ function App() {
       setChunks(embeddedChunks);
       setIndexingProgress(100);
       setIndexingState('done');
-      
+
       // Add system confirmation message to chat
       setChatMessages(prev => [
         ...prev,
@@ -316,19 +320,42 @@ function App() {
     try {
       // 1. Retrieve the top matching document chunks
       const topMatches = await retrieveRelevantChunks(embedderRef.current, chunks, query, 3);
-      
+
       // 2. Format context for prompt
       const contextText = topMatches
         .map((c) => c.text)
         .join('\n\n---\n\n');
 
-      const systemPrompt = `Answer the user's question using ONLY the provided context. If the answer cannot be found in the context, say "I couldn't find that in the document." Do not try to make up answers or use outside knowledge. Keep your answers concise and clear. Do NOT include any citations, source numbers, brackets, source references, or relevance scores (such as "[Source 1]", "Source 2", or match percentages) in your reply. Answer naturally using only the information from the context.`;
+      const systemPrompt = `You are a friendly Semantic Document Q&A Assistant. If the user's input is a greeting, small talk, or conversational pleasantry (like "hi", "hello", "hey", "nice to meet you", "how are you", etc.), respond with a warm, friendly, and natural conversational reply. Otherwise, answer the user's question using ONLY the provided document context. If the answer cannot be found in the context, say "Unfortunately I can't help with that, I can only provide answers from the document which you provided." Do not try to make up answers or use outside knowledge. Keep your answers concise and clear. Do NOT include any citations, source numbers, brackets, source references, or relevance scores (such as "[Source 1]", "Source 2", or match percentages) in your reply. Answer naturally using only the information from the context.`;
 
-      const prompt = `Context:
-${contextText}
+      // Build the message payload including previous conversation history for a true one-to-one conversational memory
+      const messagesPayload = [
+        { role: 'system', content: systemPrompt }
+      ];
 
-Question: ${query}
-Answer:`;
+      // Extract and map previous user and assistant history (excluding the current user and bot empty streaming bubble)
+      const conversationHistory = chatMessages
+        .filter(msg => msg.id !== botMessageId && msg.id !== userMessageId && (msg.sender === 'user' || msg.sender === 'bot'))
+        .map(msg => ({
+          role: msg.sender === 'user' ? 'user' : 'assistant',
+          content: msg.text
+        }));
+
+      messagesPayload.push(...conversationHistory);
+
+      // Add document context as a system instruction before the user's latest query
+      if (chunks.length > 0) {
+        messagesPayload.push({
+          role: 'system',
+          content: `Here is the relevant document context extracted for the query:\n${contextText}`
+        });
+      }
+
+      // Add the current user query
+      messagesPayload.push({
+        role: 'user',
+        content: query
+      });
 
       // 3. API Call to Groq (streaming)
       const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
@@ -340,10 +367,7 @@ Answer:`;
         body: JSON.stringify({
           model: 'llama-3.1-8b-instant',
           stream: true,
-          messages: [
-            { role: 'system', content: systemPrompt },
-            { role: 'user', content: prompt }
-          ]
+          messages: messagesPayload
         })
       });
 
@@ -363,21 +387,21 @@ Answer:`;
 
         const chunkStr = decoder.decode(value);
         const lines = chunkStr.split('\n');
-        
+
         for (const line of lines) {
           const cleanedLine = line.trim();
           if (!cleanedLine) continue;
           if (cleanedLine === 'data: [DONE]') continue;
-          
+
           if (cleanedLine.startsWith('data: ')) {
             try {
               const json = JSON.parse(cleanedLine.slice(6));
               const delta = json.choices?.[0]?.delta?.content;
               if (delta) {
                 streamedText += delta;
-                setChatMessages(prev => prev.map(msg => 
-                  msg.id === botMessageId 
-                    ? { ...msg, text: streamedText } 
+                setChatMessages(prev => prev.map(msg =>
+                  msg.id === botMessageId
+                    ? { ...msg, text: streamedText }
                     : msg
                 ));
               }
@@ -389,12 +413,12 @@ Answer:`;
       }
     } catch (err) {
       console.error(err);
-      setChatMessages(prev => prev.map(msg => 
-        msg.id === botMessageId 
-          ? { 
-              ...msg, 
-              text: `⚠️ **Error querying Groq API:** ${err.message}. Please verify your API Key and network connection.`
-            } 
+      setChatMessages(prev => prev.map(msg =>
+        msg.id === botMessageId
+          ? {
+            ...msg,
+            text: `⚠️ **Error querying Groq API:** ${err.message}. Please verify your API Key and network connection.`
+          }
           : msg
       ));
     } finally {
@@ -420,8 +444,14 @@ Answer:`;
 
   return (
     <div style={styles.appWrapper}>
+      {/* Background blobs for room ambience */}
+      <div className="bg-blob-1" />
+      <div className="bg-blob-2" />
+      <div className="bg-blob-3" />
+
       {/* Main app panel */}
       <div style={styles.appContainer}>
+        {/* Configuration Sidebar */}
         <Sidebar
           modelState={modelState}
           modelProgress={modelProgress}
@@ -437,6 +467,8 @@ Answer:`;
           onFileSelected={handleFileSelected}
           onReset={resetAll}
         />
+
+        {/* Chat Window Stream */}
         <ChatWindow
           pdfFile={pdfFile}
           chatMessages={chatMessages}
